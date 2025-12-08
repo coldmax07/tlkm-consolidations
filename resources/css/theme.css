@@ -1,0 +1,190 @@
+/* Telkom-inspired theme overrides for Bootstrap 5.3+ (CSS variables only) */
+
+/* === Brand Palette (derived approximations) ===
+   Primary Blue:  #00A3E0  (core “Telkom blue”)
+   Blue-600:      #008EC2
+   Blue-700:      #0079A6
+   Accent Green:  #00A651
+   Warning Gold:  #FFB612
+   Danger Red:    #DE3831
+   Dark Navy:     #0B2A3B
+   Slate:         #495057
+   Light:         #F8F9FA
+*/
+
+:root {
+  /* Brand tokens */
+  --brand-primary:        #09f;
+  --brand-primary-600:    #008EC2;
+  --brand-primary-700:    #0079A6;
+  --brand-accent:         #00A651;
+  --brand-warning:        #FFB612;
+  --brand-danger:         #DE3831;
+  --brand-dark:           #0B2A3B;
+  --brand-slate:          #495057;
+  --brand-light:          #F8F9FA;
+
+  /* Wire into Bootstrap’s CSS variables */
+  --bs-primary:           var(--brand-primary);
+  --bs-primary-rgb:       0, 163, 224;
+
+  --bs-success:           var(--brand-accent);
+  --bs-success-rgb:       0, 166, 81;
+
+  --bs-warning:           var(--brand-warning);
+  --bs-warning-rgb:       255, 182, 18;
+
+  --bs-danger:            var(--brand-danger);
+  --bs-danger-rgb:        222, 56, 49;
+
+  --bs-body-color:        var(--brand-slate);
+  --bs-body-color-rgb:    73, 80, 87;
+  --bs-body-bg:           #ffffff;
+
+  /* Links & focus */
+  --bs-link-color:        var(--brand-primary);
+  --bs-link-hover-color:  var(--brand-primary-600);
+
+  --bs-focus-ring-color:  rgba(0, 163, 224, .25); /* primary 25% */
+
+  /* Form controls */
+  --bs-emphasis-color:    var(--brand-dark);
+}
+
+/* Buttons */
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--brand-primary);
+  --bs-btn-border-color: var(--brand-primary);
+  --bs-btn-hover-bg: var(--brand-primary-600);
+  --bs-btn-hover-border-color: var(--brand-primary-600);
+  --bs-btn-active-bg: var(--brand-primary-700);
+  --bs-btn-active-border-color: var(--brand-primary-700);
+  --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--brand-primary);
+  --bs-btn-border-color: var(--brand-primary);
+  --bs-btn-hover-bg: var(--brand-primary);
+  --bs-btn-hover-border-color: var(--brand-primary);
+  --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb);
+}
+
+/* Navbar (dark variant with Telkom blue accents) */
+.navbar-dark {
+  --bs-navbar-color: rgba(255,255,255,.75);
+  --bs-navbar-hover-color: #fff;
+  --bs-navbar-brand-color: #fff;
+  --bs-navbar-brand-hover-color: #fff;
+}
+.navbar-dark.bg-dark {
+  background-color: var(--brand-dark) !important;
+}
+
+/* Sidebar (dashboard example) */
+.sidebar .nav-link.active {
+  color: var(--brand-primary);
+  font-weight: 600;
+}
+.sidebar .nav-link:hover {
+  color: var(--brand-primary-600);
+}
+
+/* Forms */
+.form-control:focus {
+  border-color: var(--brand-primary-600);
+  box-shadow: 0 0 0 .25rem var(--bs-focus-ring-color);
+}
+
+/* Badges */
+.badge.bg-primary { background-color: var(--brand-primary) !important; }
+.badge.text-bg-primary { background-color: var(--brand-primary) !important; }
+
+/* Cards & headings */
+.card-title, .h2, .h3, .h4, h2, h3, h4 {
+  color: var(--brand-dark);
+}
+
+/* Links inside content */
+a:not(.btn) {
+  text-decoration-color: rgba(0,163,224,.35);
+}
+a:not(.btn):hover {
+  text-decoration-color: rgba(0,163,224,.6);
+}
+
+/* Utility helpers */
+.bg-brand-primary { background-color: var(--brand-primary) !important; }
+.text-brand-primary { color: var(--brand-primary) !important; }
+.bg-brand-dark { background-color: var(--brand-dark) !important; }
+.text-brand-dark { color: var(--brand-dark) !important; }
+
+/* ===== Soft-UI style additions (original implementation) ===== */
+:root{
+  --sui-radius-lg: 1rem;
+  --sui-radius-md: .75rem;
+  --sui-shadow-sm: 0 .25rem .75rem rgba(11,42,59,.06), 0 .125rem .25rem rgba(11,42,59,.05);
+  --sui-shadow: 0 1rem 2rem rgba(11,42,59,.08), 0 .25rem .75rem rgba(11,42,59,.06);
+  --sui-shadow-inset: inset 0 1px 1px rgba(255,255,255,.7), inset 0 -2px 6px rgba(11,42,59,.06);
+  --sui-border: 1px solid rgba(11,42,59,.08);
+  --sui-muted:#6c757d;
+  --sui-sidebar-bg:#f7f9fb;
+  --sui-icon-bg:#fff;
+}
+
+/* global rounding + subtle borders */
+.card,.form-control,.btn,.dropdown-menu,.badge,.alert,.modal-content,.toast,.table,.list-group-item{
+  border-radius: var(--sui-radius-lg) !important;
+}
+
+/* cards */
+.card{ border:var(--sui-border); box-shadow:var(--sui-shadow-sm); }
+.card:hover{ box-shadow:var(--sui-shadow); transition:box-shadow .2s ease; }
+.card.card-lift{ transition: transform .2s ease, box-shadow .2s ease; }
+.card.card-lift:hover{ transform: translateY(-2px); }
+
+/* card header */
+.sui-card-header{ border-bottom:var(--sui-border); background:#fff; }
+.sui-card-header .card-title{ margin-bottom:0; }
+
+/* forms */
+.form-control{ border:var(--sui-border); background:#fff; }
+.form-control:focus{ box-shadow:0 0 0 .25rem var(--bs-focus-ring-color), var(--sui-shadow-inset); border-color: rgba(0,163,224,.4); }
+
+/* tables */
+.table.sui-table{ background:#fff; border:var(--sui-border); box-shadow:var(--sui-shadow-sm); overflow:hidden; border-radius:var(--sui-radius-lg); }
+.table.sui-table > :not(caption) > * > *{ border-bottom-color: rgba(11,42,59,.06); }
+.table.sui-table thead th{ background:#fff; color:var(--brand-dark); font-weight:600; position:sticky; top:0; z-index:1; }
+.table.sui-table tbody tr{ transition: background-color .15s ease; }
+.table.sui-table tbody tr:hover{ background-color: rgba(0,163,224,.035); }
+
+/* chips/badges */
+.sui-chip{ display:inline-flex; align-items:center; gap:.375rem; padding:.35rem .6rem; border-radius:1rem; border:var(--sui-border); background:#fff; box-shadow:var(--sui-shadow-inset); font-size:.8125rem; }
+.sui-chip .bi{ font-size:.9rem; }
+
+/* stat widget */
+.sui-stat{ display:flex; align-items:center; gap:.75rem; }
+.sui-stat .sui-icon{ width:42px; height:42px; border-radius:12px; background:#fff; border:var(--sui-border); box-shadow:var(--sui-shadow-inset); display:inline-flex; align-items:center; justify-content:center; }
+.sui-stat .sui-value{ font-size:1.25rem; font-weight:700; color:var(--brand-dark); }
+.sui-stat .sui-label{ color:var(--sui-muted); font-size:.8125rem; }
+
+/* sidebar look */
+.sui-sidebar{ background:var(--sui-sidebar-bg); border-right:var(--sui-border); }
+.sui-sidebar .sui-section{ padding:.75rem 1rem; font-size:.75rem; letter-spacing:.04em; color:var(--sui-muted); text-transform:uppercase; }
+.sui-sidebar .nav-link{ display:flex; align-items:center; gap:.75rem; padding:.6rem .9rem; border-radius:var(--sui-radius-md); color:var(--bs-body-color); }
+.sui-sidebar .nav-link .sui-icon{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:.75rem; background:var(--sui-icon-bg); border:var(--sui-border); box-shadow:var(--sui-shadow-inset); }
+.sui-sidebar .nav-link:hover{ background:#fff; box-shadow:var(--sui-shadow-sm); color:var(--brand-primary); }
+.sui-sidebar .nav-link.active{ background:#fff; color:var(--brand-primary); box-shadow:var(--sui-shadow); }
+.sui-sidebar .nav-link.active .sui-icon{ border-color: rgba(0,163,224,.35); }
+
+/* main backdrop */
+.main-shell{ background: linear-gradient(180deg,#ffffff 0%, #f7f9fb 60%, #f3f6f9 100%); min-height:100vh; }
+
+/* utilities */
+.shadow-soft{ box-shadow:var(--sui-shadow)!important; }
+.border-soft{ border:var(--sui-border)!important; }
+.rounded-soft{ border-radius:var(--sui-radius-lg)!important; }
+.bg-soft-gradient{ background-image: linear-gradient(135deg, rgba(0,163,224,.15), rgba(0,166,81,.12)); }
+.g-soft{ --bs-gutter-x:1.25rem; --bs-gutter-y:1.25rem; }
+.sui-avatar{ width:36px; height:36px; border-radius:50%; object-fit:cover; box-shadow: 0 0 0 3px #fff, var(--sui-shadow-sm); }

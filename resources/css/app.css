@@ -1,0 +1,24 @@
+/* Center the sign-in form nicely without inline style */
+.needs-validation {
+  /* rely primarily on Bootstrap utilities; keep this empty or tiny */
+}
+
+/* Dashboard tweaks if needed */
+.sidebar .nav-link.active {
+  font-weight: 600;
+}
+
+.auto-filled {
+  animation: autoFillPulse 1s ease;
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+@keyframes autoFillPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.45);
+  }
+  100% {
+    box-shadow: none;
+  }
+}

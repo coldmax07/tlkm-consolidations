@@ -1,0 +1,176 @@
+/*
+       * Telkom design tokens (approximate values)
+       * Adjust these to match your official brand guide if needed.
+       */
+:root {
+    --telkom-primary: #00a9e0;
+    --telkom-primary-dark: #0078a5;
+    --telkom-accent-green: #00a651;
+
+    --telkom-text-color: #28323f;
+    --telkom-muted-text: #6c7480;
+
+    --telkom-header-bg: #f5f9fc;
+    --telkom-header-text: #00324d;
+
+    --telkom-row-bg: #ffffff;
+    --telkom-row-alt-bg: #f7f9fb;
+    --telkom-row-hover-bg: #e7f6fd;
+
+    --telkom-border-color: #e0e5eb;
+    --telkom-border-strong: #c1ccd8;
+}
+
+/*
+ * If you want the Telkom look to apply only inside a wrapper, uncomment this
+ * and replace `.table` with `.telkom-theme .table` in the rules below.
+ *
+ *  .telkom-theme { color: var(--telkom-text-color); }
+ */
+
+/*
+ * Core Bootstrap 5 table variable overrides
+ * These change the look of ALL .table instances.
+ */
+.table {
+    --bs-table-color: var(--telkom-text-color);
+    --bs-table-bg: var(--telkom-row-bg);
+    --bs-table-striped-bg: var(--telkom-row-alt-bg);
+    --bs-table-striped-color: var(--telkom-text-color);
+    --bs-table-hover-bg: var(--telkom-row-hover-bg);
+    --bs-table-hover-color: var(--telkom-text-color);
+    --bs-table-border-color: var(--telkom-border-color);
+    --bs-table-accent-bg: transparent;
+    border-color: var(--telkom-border-color);
+    font-size: 0.9rem;
+}
+
+.table > :not(caption) > * > * {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--telkom-border-color);
+    vertical-align: middle;
+}
+
+/* Header styling */
+.table thead th {
+    background-color: var(--telkom-header-bg);
+    color: var(--telkom-header-text);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--telkom-primary);
+    border-top: none;
+}
+
+.table thead th:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+.table thead th:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+/* Bordered table variant */
+.table-bordered {
+    border: 1px solid var(--telkom-border-strong);
+}
+
+.table-bordered > :not(caption) > * > * {
+    border: 1px solid var(--telkom-border-color);
+}
+
+/* Striped rows (using variables above) */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    box-shadow: inset 0 0 0 9999px var(--telkom-row-alt-bg);
+}
+
+/* Hover state: subtle left border + background */
+.table-hover > tbody > tr:hover > * {
+    box-shadow: inset 4px 0 0 0 var(--telkom-primary),
+    inset 0 0 0 9999px var(--telkom-row-hover-bg);
+    cursor: pointer;
+}
+
+/* Small table spacing */
+.table-sm > :not(caption) > * > * {
+    padding: 0.45rem 0.75rem;
+}
+
+/* Muted text cells */
+.table .text-muted {
+    color: var(--telkom-muted-text) !important;
+}
+
+/* Contextual row mappings to a Telkom-ish palette */
+.table-primary {
+    --bs-table-bg: #e1f5fd;
+    --bs-table-border-color: #b3e3f7;
+    --bs-table-striped-bg: #d9f0fa;
+    --bs-table-hover-bg: #cceaf8;
+    --bs-table-color: #00324d;
+}
+
+.table-success {
+    --bs-table-bg: #e2f7ef;
+    --bs-table-border-color: #b4e6d2;
+    --bs-table-striped-bg: #daf2ea;
+    --bs-table-hover-bg: #c9ebdf;
+    --bs-table-color: #124634;
+}
+
+.table-warning {
+    --bs-table-bg: #fff6e1;
+    --bs-table-border-color: #ffe0a3;
+    --bs-table-striped-bg: #ffefcf;
+    --bs-table-hover-bg: #ffe4b3;
+    --bs-table-color: #4d3500;
+}
+
+.table-danger {
+    --bs-table-bg: #ffe8ea;
+    --bs-table-border-color: #f7bac1;
+    --bs-table-striped-bg: #fddfe3;
+    --bs-table-hover-bg: #f7ccd2;
+    --bs-table-color: #5a111f;
+}
+
+/* Optional: responsive wrapper that gives a card-like Telkom feel */
+.telkom-table-card {
+    border-radius: 0.75rem;
+    border: 1px solid var(--telkom-border-color);
+    box-shadow: 0 4px 12px rgba(6, 46, 77, 0.06);
+    overflow: hidden;
+    background-color: #ffffff;
+}
+
+.telkom-table-card .table {
+    margin-bottom: 0;
+}
+
+.telkom-table-caption {
+    padding: 0.75rem 1rem 0.25rem;
+    border-bottom: 1px solid var(--telkom-border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.telkom-table-caption-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--telkom-header-text);
+}
+
+.telkom-table-caption-subtitle {
+    font-size: 0.8rem;
+    color: var(--telkom-muted-text);
+}
+
+@media (max-width: 575.98px) {
+    .telkom-table-caption {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
