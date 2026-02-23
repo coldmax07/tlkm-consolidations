@@ -1,0 +1,65 @@
+TLKM Confirmations
+IT Requirements for Outbound Email
+Microsoft Graph (App-Only), UAT and Production
+
+Date: February 23, 2026
+
+1) Why we are sending this
+We need IT support so TLKM Confirmations can send system emails to users in UAT and Production.
+This document only covers what we need from IT.
+
+2) Email model to use
+- Email must be sent through Microsoft Graph API (not SMTP).
+- The application will use app-only authentication.
+
+3) What we need from IT
+
+A. Create Graph app access for each environment
+- Create one app registration for UAT and one for Production (recommended).
+- Provide for each environment:
+  - Tenant ID
+  - Client ID
+  - App credential (secret or certificate; certificate preferred for Production)
+
+B. Grant required permission
+- Grant Microsoft Graph Application permission:
+  - Mail.Send
+- Grant admin consent for that permission.
+
+C. Provide sender mailbox identity
+- Provide approved sender mailbox(es) for each environment.
+- Confirm display name and reply-to rules.
+- Shared mailbox is acceptable if it meets IT policy.
+
+D. Restrict what mailbox the app can send as
+- Mail.Send is broad by default, so IT must restrict scope to approved sender mailbox(es).
+- Preferred control: Exchange Online RBAC for Applications.
+- Confirm this restriction is active in UAT and Production.
+
+E. Define compliance and usage controls
+- UAT sending restrictions (for example: test recipients only).
+- Rate limits/quotas.
+- Message tracing/logging availability.
+- Security controls (DLP/scanning/retention) as required by policy.
+
+F. Support and ownership
+- Provide IT support owner and escalation contact for email delivery issues.
+- Confirm credential rotation process and schedule.
+
+4) Important clarification
+- The app does not need an interactive Microsoft 365 user login account.
+- The app signs in as an Entra application (service principal).
+- A sender mailbox identity is still required for outgoing email.
+
+5) What we need to receive back from IT
+Please provide the following per environment (UAT and Production):
+- Tenant ID
+- Client ID
+- Credential details (or secret manager reference)
+- Confirmation that Mail.Send (Application) + admin consent is complete
+- Approved sender mailbox(es)
+- Confirmation of mailbox scope restriction
+- IT support owner/contact
+
+6) Go-live dependency
+We cannot complete email rollout until IT provides and confirms all items above for both UAT and Production.
