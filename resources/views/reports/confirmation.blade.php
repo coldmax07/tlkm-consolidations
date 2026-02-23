@@ -34,17 +34,20 @@
 </head>
 <body>
     <table>
-        <tr><td class="meta-title nowrap" colspan="14">{{ $reportTitle }}</td></tr>
+        <tr><td class="meta-title nowrap" colspan="17">{{ $reportTitle }}</td></tr>
         <tr><td class="bold nowrap">Company: {{ $companyName }}</td></tr>
         <tr><td class="bold nowrap">Period: {{ $period }}</td></tr>
         <tr><td class="bold nowrap">Generated: {{ $generatedAt }}</td></tr>
-        <tr><td colspan="14" style="height:4px;"></td></tr>
+        <tr><td colspan="17" style="height:4px;"></td></tr>
     </table>
 
     <table>
         <colgroup>
             <col style="width:12%;">
             <col style="width:12%;">
+            <col style="width:10%;">
+            <col style="width:8%;">
+            <col style="width:8%;">
             <col style="width:10%;">
             <col style="width:10%;">
             <col style="width:7%;">
@@ -59,13 +62,16 @@
             <col style="width:6%;">
         </colgroup>
         <tr>
-            <th class="th-border" colspan="6"></th>
+            <th class="th-border" colspan="9"></th>
             <th class="th-border group-header-current" colspan="4">CURRENT COMPANY</th>
             <th class="th-border group-header-counter" colspan="4">COUNTER-PART COMPANY</th>
         </tr>
         <tr>
             <th class="th-border subheader-current">HFM ACCOUNT</th>
             <th class="th-border subheader-current">TRADING PARTNER</th>
+            <th class="th-border subheader-current">DESCRIPTION</th>
+            <th class="th-border subheader-current">ADJUSTMENT (SENDER)</th>
+            <th class="th-border subheader-current">FINAL AMOUNT (SENDER)</th>
             <th class="th-border subheader-current">CURRENT COMPANY AMOUNT</th>
             <th class="th-border subheader-current">COUNTERPARTY AMOUNT</th>
             <th class="th-border subheader-current">VARIANCE</th>
@@ -89,6 +95,9 @@
             <tr class="{{ $rowClass }}">
                 <td class="td-border nowrap">{{ $row['hfm_account'] ?? '—' }}</td>
                 <td class="td-border nowrap">{{ $row['trading_partner'] ?? '—' }}</td>
+                <td class="td-border nowrap">{{ $row['description'] ?? '—' }}</td>
+                <td class="td-border text-right nowrap">{{ $row['adjustment_amount'] !== null ? money_fmt($row['adjustment_amount']) : '—' }}</td>
+                <td class="td-border text-right nowrap">{{ $row['final_amount'] !== null ? money_fmt($row['final_amount']) : '—' }}</td>
                 <td class="td-border current-cell text-right nowrap">{{ money_fmt($row['current_amount'] ?? 0) }}</td>
                 <td class="td-border current-cell text-right nowrap">{{ money_fmt($row['counterparty_amount'] ?? 0) }}</td>
                 <td class="td-border text-right nowrap {{ $varianceClass }}">{{ money_fmt($variance) }}</td>

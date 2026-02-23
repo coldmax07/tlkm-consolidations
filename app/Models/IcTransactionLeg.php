@@ -24,6 +24,7 @@ class IcTransactionLeg extends Model
         'reviewed_by_id',
         'reviewed_at',
         'amount',
+        'adjustment_amount',
         'agreement_status_id',
         'disagree_reason',
         'counterparty_amount_snapshot',
@@ -33,6 +34,7 @@ class IcTransactionLeg extends Model
         'prepared_at' => 'datetime',
         'reviewed_at' => 'datetime',
         'amount' => 'decimal:2',
+        'adjustment_amount' => 'decimal:2',
         'counterparty_amount_snapshot' => 'decimal:2',
     ];
 
@@ -89,5 +91,17 @@ class IcTransactionLeg extends Model
     public function statusHistory(): HasMany
     {
         return $this->hasMany(IcLegStatusHistory::class, 'ic_transaction_leg_id');
+    }
+
+    public function getFinalAmountAttribute(): ?float
+    {
+        if ($this->amount === null) {
+            return null;
+        }
+
+        $amount = (float) $this->amount;
+        $adjustment = (float) ($this->adjustment_amount ?? 0);
+
+        return round($amount - $adjustment, 2);
     }
 }

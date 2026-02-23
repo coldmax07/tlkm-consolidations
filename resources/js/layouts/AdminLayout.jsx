@@ -132,9 +132,9 @@ export default function AdminLayout() {
                 </li>*/}
                 <li className="sui-section mt-3">Account Pages</li>
                 <li className="nav-item mt-1">
-                  <Link className="nav-link" to="#">
-                    <span className="sui-icon"><i className="bi bi-person"></i></span>
-                    <span>Profile</span>
+                  <Link className={`nav-link ${pathname.startsWith('/admin/users') ? 'active' : ''}`} to="/admin/users">
+                    <span className="sui-icon"><i className="bi bi-people"></i></span>
+                    <span>Users</span>
                   </Link>
                 </li>
                 <li className="nav-item mt-2">

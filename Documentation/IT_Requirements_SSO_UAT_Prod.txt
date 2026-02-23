@@ -1,0 +1,59 @@
+TLKM Confirmations
+IT Requirements for Single Sign-On (SSO)
+UAT and Production
+
+Date: February 23, 2026
+
+1) Why we are sending this
+We need IT support to enable Microsoft sign-in for TLKM Confirmations in both UAT and Production.
+This document only covers what we need from IT.
+
+2) What we need from IT
+
+A. Create and configure Microsoft Entra application access
+- Create one app registration for UAT and one for Production (recommended).
+- Provide the following for each environment:
+  - Tenant ID
+  - Client ID
+  - App credential (secret or certificate)
+
+B. Approve redirect URLs
+- Approve the login callback URL for each environment:
+  - UAT: https://<uat-domain>/auth/sso/callback
+  - Production: https://<prod-domain>/auth/sso/callback
+
+C. Confirm sign-in policy
+- Confirm that only active users in Microsoft Entra can sign in.
+- Confirm MFA/Conditional Access rules that must apply.
+- Confirm whether UAT policies should match Production or be lighter for testing.
+
+D. Provide environment separation
+- UAT and Production must use separate app credentials.
+- Credentials and URLs must not be shared between environments.
+
+E. Confirm security and support controls
+- Confirm who owns secret/certificate rotation and how often.
+- Confirm logging and audit availability for sign-in success/failure.
+- Confirm support contact and escalation path for SSO issues.
+
+3) Important clarification
+- We only need Microsoft Entra to confirm user identity and active status.
+- Our application handles user roles and access permissions internally.
+- IT does not need to design role mapping in Entra for TLKM application access.
+
+4) Decisions needed from IT
+- Are UAT and Production in one Entra tenant or separate tenants?
+- Will credentials use certificates (preferred) or client secrets?
+- Is single logout required?
+
+5) What we need to receive back from IT
+Please provide the following per environment (UAT and Production):
+- Tenant ID
+- Client ID
+- Credential details (or secret manager reference)
+- Approved callback URL
+- Security policy confirmation (MFA/Conditional Access)
+- IT support owner/contact
+
+6) Go-live dependency
+We cannot complete SSO rollout until IT provides and approves all items above for both UAT and Production.

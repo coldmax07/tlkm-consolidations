@@ -43,13 +43,21 @@ async function requestJSON(url, { method = 'GET', body } = {}) {
       try {
         data = JSON.parse(trimmed)
       } catch {
-        data = { message: trimmed }
+        data = { message: trimmed, html: trimmed }
       }
     }
 
     if (!res.ok) {
       const err = new Error(data?.message || 'Request failed')
       err.status = res.status
+      err.data = data
+      throw err
+    }
+
+    // Guard against HTML fallback (e.g., unauthenticated redirect)
+    if (typeof data === 'object' && data.html && data.message) {
+      const err = new Error('Unexpected HTML response (possibly unauthenticated).')
+      err.status = res.status || 401
       err.data = data
       throw err
     }
@@ -62,19 +70,12 @@ async function requestJSON(url, { method = 'GET', body } = {}) {
     if (method !== 'GET') {
       await refreshCsrfToken()
       headers['X-CSRF-TOKEN'] = csrfToken()
-      if (body && typeof body === 'object') {
-        body._token = csrfToken()
-      }
     }
     return await doFetch()
   } catch (err) {
     if (err.status === 419) {
       await refreshCsrfToken()
       headers['X-CSRF-TOKEN'] = csrfToken()
-      if (body && typeof body === 'object') {
-        body._token = csrfToken()
-        options.body = JSON.stringify(body)
-      }
       return await doFetch()
     }
     throw err
@@ -104,7 +105,7 @@ export function patchJSON(url, body) {
 export async function postForm(url, formData) {
   const res = await fetch(url, {
     method: 'POST',
-    credentials: 'same-origin',
+    credentials: 'include',
     headers: {
       'X-CSRF-TOKEN': csrfToken(),
     },

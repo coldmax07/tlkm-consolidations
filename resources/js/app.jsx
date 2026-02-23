@@ -18,6 +18,8 @@ import ReportView from './pages/ReportView'
 import AdminLayout from './layouts/AdminLayout'
 import AuthLayout from './layouts/AuthLayout'
 import ProtectedRoute from './components/ProtectedRoute'
+import Users from './pages/Users'
+import UserForm from './pages/UserForm'
 
 function AppRouter() {
   return (
@@ -62,6 +64,16 @@ function AppRouter() {
         <Route path="/admin/fiscal-calendar" element={
           <ProtectedRoute>
             <FiscalCalendar />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/users" element={
+          <ProtectedRoute>
+            <Users />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/users/:id" element={
+          <ProtectedRoute>
+            <UserForm />
           </ProtectedRoute>
         } />
       </Route>

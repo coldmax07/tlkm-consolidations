@@ -16,6 +16,24 @@ function formatAmount(amount, currency, { accounting = false } = {}) {
   return formatter.format(numeric)
 }
 
+function formatDescription(value, limit = 50) {
+  if (!value) return '—'
+  return value.length > limit ? `${value.slice(0, limit)}…` : value
+}
+
+function toNumberOrNull(value) {
+  if (value === '' || value === null || value === undefined) return null
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function calculateFinalAmount(amount, adjustmentAmount) {
+  const baseAmount = toNumberOrNull(amount)
+  if (baseAmount === null) return null
+  const adjustment = toNumberOrNull(adjustmentAmount) ?? 0
+  return baseAmount - adjustment
+}
+
 function LegCell({ leg, currency, children }) {
   if (!leg) return <span className="text-muted">n/a</span>
   const isPayable = leg.account?.category?.name === 'PAYABLE'
@@ -57,6 +75,7 @@ export default function StatementView({ statementSlug }) {
   const [loadingData, setLoadingData] = useState(false)
   const [error, setError] = useState('')
   const [legAmounts, setLegAmounts] = useState({})
+  const [legAdjustments, setLegAdjustments] = useState({})
   const [legAgreements, setLegAgreements] = useState({})
   const [legReasons, setLegReasons] = useState({})
   const [actionLoading, setActionLoading] = useState({})
@@ -125,16 +144,19 @@ export default function StatementView({ statementSlug }) {
   useEffect(() => {
     if (!data?.transactions) {
       setLegAmounts({})
+      setLegAdjustments({})
       setLegAgreements({})
       setLegReasons({})
       return
     }
     const next = {}
+    const nextAdjustments = {}
     const nextAgreement = {}
     const nextReasons = {}
     data.transactions.forEach(tx => {
       if (tx.legs?.sender?.id) {
         next[tx.legs.sender.id] = tx.legs.sender.amount ?? ''
+        nextAdjustments[tx.legs.sender.id] = tx.legs.sender.adjustment_amount ?? 0
       }
       if (tx.legs?.receiver?.id) {
         next[tx.legs.receiver.id] = tx.legs.receiver.amount ?? ''
@@ -143,6 +165,7 @@ export default function StatementView({ statementSlug }) {
       }
     })
     setLegAmounts(next)
+    setLegAdjustments(nextAdjustments)
     setLegAgreements(nextAgreement)
     setLegReasons(nextReasons)
   }, [data])
@@ -220,6 +243,10 @@ export default function StatementView({ statementSlug }) {
     setLegAmounts(prev => ({ ...prev, [legId]: value }))
   }
 
+  function handleAdjustmentInputChange(legId, value) {
+    setLegAdjustments(prev => ({ ...prev, [legId]: value }))
+  }
+
   function handleAgreementChange(legId, value) {
     setLegAgreements(prev => ({ ...prev, [legId]: value }))
     const status = agreementMap[value]
@@ -235,10 +262,14 @@ export default function StatementView({ statementSlug }) {
   async function saveSenderAmount(leg) {
     if (!leg) return
     const newAmount = Number(legAmounts[leg.id])
+    const adjustmentAmount = toNumberOrNull(legAdjustments[leg.id])
     setLegLoading(leg.id, true)
     setError('')
     try {
-      await patchJSON(`/api/legs/${leg.id}`, { amount: newAmount })
+      await patchJSON(`/api/legs/${leg.id}`, {
+        amount: newAmount,
+        adjustment_amount: adjustmentAmount,
+      })
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to save amount.')
@@ -525,6 +556,7 @@ export default function StatementView({ statementSlug }) {
                         <thead>
                         <tr  className='table-primary'>
                             <th scope='col' role="button" onClick={() => toggleTransactionSort('sender_company')}>Pair {sortIndicator('sender_company')}</th>
+                            <th>Description</th>
                             <th role="button" onClick={() => toggleTransactionSort('sender_company')}>Sender {sortIndicator('sender_company')}</th>
                             <th role="button" onClick={() => toggleTransactionSort('receiver_company')}>Receiver {sortIndicator('receiver_company')}</th>
                             <th role="button" onClick={() => toggleTransactionSort('variance')}>Variance {sortIndicator('variance')}</th>
@@ -533,13 +565,15 @@ export default function StatementView({ statementSlug }) {
                         <tbody>
                         {(data?.transactions?.length ?? 0) === 0 && (
                             <tr>
-                                <td colSpan="4" className="text-center py-4 text-muted">No transactions for this filter.</td>
+                                <td colSpan="5" className="text-center py-4 text-muted">No transactions for this filter.</td>
                             </tr>
                         )}
                         {data?.transactions?.map(tx => {
                   const senderLeg = tx.legs.sender
                   const receiverLeg = tx.legs.receiver
                   const senderAmountValue = senderLeg ? (legAmounts[senderLeg.id] ?? senderLeg.amount ?? '') : ''
+                  const senderAdjustmentValue = senderLeg ? (legAdjustments[senderLeg.id] ?? senderLeg.adjustment_amount ?? 0) : ''
+                  const senderFinalAmountValue = senderLeg ? calculateFinalAmount(senderAmountValue, senderAdjustmentValue) : null
                   const receiverAmountValue = receiverLeg ? (legAmounts[receiverLeg.id] ?? receiverLeg.amount ?? '') : ''
                   const receiverAgreementValue = receiverLeg ? (legAgreements[receiverLeg.id] ?? receiverLeg.agreement_status?.id ?? '') : ''
                   const receiverReasonValue = receiverLeg ? (legReasons[receiverLeg.id] ?? receiverLeg.disagree_reason ?? '') : ''
@@ -567,8 +601,19 @@ export default function StatementView({ statementSlug }) {
                                             Comments
                                         </button>
                                     </td>
+                                    <td>{formatDescription(tx.description)}</td>
                                     <td>
                                         <LegCell leg={senderLeg} currency={tx.currency}>
+                                            {senderLeg && (
+                                                <>
+                                                    <div className="small text-muted">
+                                                        Adjustment: {formatAmount(senderAdjustmentValue, tx.currency)}
+                                                    </div>
+                                                    <div className="small fw-semibold">
+                                                        Final Amount: {formatAmount(senderFinalAmountValue, tx.currency)}
+                                                    </div>
+                                                </>
+                                            )}
                                             {(senderCanEdit || senderCanReview) && (
                                                 <div className="mt-2 vstack gap-2">
                                                     {senderCanEdit && (
@@ -580,6 +625,15 @@ export default function StatementView({ statementSlug }) {
                                                                 style={{ maxWidth: '140px' }}
                                                                 value={senderAmountValue}
                                                                 onChange={e => handleAmountInputChange(senderLeg.id, e.target.value)}
+                                                            />
+                                                            <input
+                                                                type="number"
+                                                                step="0.01"
+                                                                className="form-control form-control-sm"
+                                                                style={{ maxWidth: '140px' }}
+                                                                placeholder="Adjustment"
+                                                                value={senderAdjustmentValue}
+                                                                onChange={e => handleAdjustmentInputChange(senderLeg.id, e.target.value)}
                                                             />
                                                             <button
                                                                 className="btn btn-sm btn-outline-primary"

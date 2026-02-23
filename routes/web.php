@@ -1,15 +1,18 @@
 <?php
 // routes/web.php
 
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\FiscalYearController;
 use App\Http\Controllers\Api\LegWorkflowController;
 use App\Http\Controllers\Api\PeriodGenerationController;
 use App\Http\Controllers\Api\PeriodLockController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\StatementController;
 use App\Http\Controllers\Api\StatementMetaController;
 use App\Http\Controllers\Api\TemplateLookupController;
 use App\Http\Controllers\Api\ThreadController;
 use App\Http\Controllers\Api\TransactionTemplateController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -88,10 +91,16 @@ Route::middleware('auth')->prefix('api')->group(function () {
     Route::get('/transactions/{transaction}/thread', [ThreadController::class, 'show']);
     Route::post('/transactions/{transaction}/messages', [ThreadController::class, 'storeMessage']);
     Route::post('/messages/{message}/attachments', [ThreadController::class, 'storeAttachment']);
-    Route::get('/reports', \App\Http\Controllers\Api\ReportController::class);
-    Route::get('/reports/export', [\App\Http\Controllers\Api\ReportController::class, 'export']);
-    Route::get('/reports/export-pdf', [\App\Http\Controllers\Api\ReportController::class, 'exportPdf']);
-    Route::get('/dashboard', \App\Http\Controllers\Api\DashboardController::class);
+    Route::get('/reports', ReportController::class);
+    Route::get('/reports/export', [ReportController::class, 'export']);
+    Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf']);
+    Route::get('/dashboard', DashboardController::class);
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/meta', [UserController::class, 'meta']);
+    Route::get('/users/{user}', [UserController::class, 'show']);
+    Route::post('/users', [UserController::class, 'store']);
+    Route::put('/users/{user}', [UserController::class, 'update']);
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
 });
 
 /**

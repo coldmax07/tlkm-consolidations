@@ -78,6 +78,7 @@ class ReportController extends Controller
             ->with([
                 'senderCompany',
                 'receiverCompany',
+                'template',
                 'legs.legRole',
                 'legs.legNature',
                 'legs.status',
@@ -129,11 +130,15 @@ class ReportController extends Controller
             $currentAmount = (float) ($currentLeg->amount ?? 0);
             $counterpartyAmount = (float) ($otherLeg?->amount ?? 0);
             $rowVariance = round($currentAmount - $counterpartyAmount, 2);
+            $isCurrentSender = $currentLeg->legRole?->name === 'SENDER';
 
             $rows->push([
                 'transaction_id' => $transaction->id,
                 'hfm_account' => $accountName,
                 'trading_partner' => $tradingPartner,
+                'description' => $transaction->template?->description,
+                'adjustment_amount' => $isCurrentSender ? (float) ($currentLeg->adjustment_amount ?? 0) : null,
+                'final_amount' => $isCurrentSender ? $currentLeg->final_amount : null,
                 'category_label' => $categoryLabel,
                 'current_amount' => $currentAmount,
                 'counterparty_amount' => $counterpartyAmount,
@@ -290,6 +295,9 @@ class ReportController extends Controller
             return [
                 'hfm_account' => $row['hfm_account'] ?? '—',
                 'trading_partner' => $row['trading_partner'] ?? '—',
+                'description' => $row['description'] ?? '—',
+                'adjustment_amount' => $row['adjustment_amount'] ?? null,
+                'final_amount' => $row['final_amount'] ?? null,
                 'current_amount' => $currentAmount,
                 'counterparty_amount' => $counterAmount,
                 'variance' => $row['variance'] ?? 0,
@@ -340,6 +348,9 @@ class ReportController extends Controller
             return [
                 'hfm_account' => $row['hfm_account'] ?? '—',
                 'trading_partner' => $row['trading_partner'] ?? '—',
+                'description' => $row['description'] ?? '—',
+                'adjustment_amount' => $row['adjustment_amount'] ?? null,
+                'final_amount' => $row['final_amount'] ?? null,
                 'current_amount' => $row['current_amount'] ?? 0,
                 'counterparty_amount' => $row['counterparty_amount'] ?? 0,
                 'variance' => $row['variance'] ?? 0,

@@ -130,6 +130,7 @@ class DashboardController extends Controller
         return [
             'id' => $period->id,
             'label' => $period->label,
+            'period_number' => $period->period_number,
             'year' => $period->year,
             'month' => $period->month,
         ];

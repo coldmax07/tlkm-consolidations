@@ -8,6 +8,7 @@ use App\Models\IcTransactionLeg;
 use App\Models\Period;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Support\Str;
 
 class StatementController extends Controller
 {
@@ -41,6 +42,7 @@ class StatementController extends Controller
                 'account.category',
                 'transaction.senderCompany',
                 'transaction.receiverCompany',
+                'transaction.template',
                 'transaction',
             ])
             ->whereHas('transaction', function ($query) use ($filters) {
@@ -109,6 +111,9 @@ class StatementController extends Controller
             return [
                 'transaction_id' => $transaction?->id,
                 'template_id' => $transaction?->transaction_template_id,
+                'description' => $transaction?->template?->description
+                    ? Str::limit($transaction->template->description, 50, '…')
+                    : null,
                 'currency' => $transaction?->currency,
                 'sender_company' => [
                     'id' => $transaction?->senderCompany?->id,
@@ -174,6 +179,8 @@ class StatementController extends Controller
 
     protected function transformLeg(IcTransactionLeg $leg, Gate $gate): array
     {
+        $isSender = $leg->legRole?->name === 'SENDER';
+
         return [
             'id' => $leg->id,
             'company' => [
@@ -215,6 +222,8 @@ class StatementController extends Controller
                 'label' => $leg->agreementStatus?->display_label,
             ],
             'amount' => $leg->amount !== null ? (float) $leg->amount : null,
+            'adjustment_amount' => $isSender && $leg->adjustment_amount !== null ? (float) $leg->adjustment_amount : null,
+            'final_amount' => $isSender ? $leg->final_amount : null,
             'disagree_reason' => $leg->disagree_reason,
             'permissions' => $this->resolvePermissions($leg, $gate),
         ];

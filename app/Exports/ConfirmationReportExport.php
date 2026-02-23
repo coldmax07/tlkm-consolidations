@@ -40,6 +40,9 @@ class ConfirmationReportExport implements FromCollection, WithEvents
             return [
                 $row['hfm_account'] ?? '—',
                 $row['trading_partner'] ?? '—',
+                $row['description'] ?? '—',
+                $row['adjustment_amount'] ?? '—',
+                $row['final_amount'] ?? '—',
                 $row['current_amount'] ?? 0,
                 $row['counterparty_amount'] ?? 0,
                 $row['variance'] ?? 0,
@@ -68,7 +71,7 @@ class ConfirmationReportExport implements FromCollection, WithEvents
 
                 // Row 1: report title
                 $sheet->setCellValue('A1', $this->reportTitle);
-                $sheet->mergeCells('A1:N1');
+                $sheet->mergeCells('A1:Q1');
                 $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
@@ -92,27 +95,27 @@ class ConfirmationReportExport implements FromCollection, WithEvents
                 $dataStartRow = 9;
 
                 // Group headers
-                $sheet->mergeCells("G{$headerRow1}:J{$headerRow1}");
-                $sheet->mergeCells("K{$headerRow1}:N{$headerRow1}");
-                $sheet->setCellValue("G{$headerRow1}", 'CURRENT COMPANY');
-                $sheet->setCellValue("K{$headerRow1}", 'COUNTER-PART COMPANY');
-                $sheet->getStyle("G{$headerRow1}:J{$headerRow1}")->applyFromArray($this->groupHeaderStyle('#00A1D6'));
-                $sheet->getStyle("K{$headerRow1}:N{$headerRow1}")->applyFromArray($this->groupHeaderStyle('#008A00'));
+                $sheet->mergeCells("J{$headerRow1}:M{$headerRow1}");
+                $sheet->mergeCells("N{$headerRow1}:Q{$headerRow1}");
+                $sheet->setCellValue("J{$headerRow1}", 'CURRENT COMPANY');
+                $sheet->setCellValue("N{$headerRow1}", 'COUNTER-PART COMPANY');
+                $sheet->getStyle("J{$headerRow1}:M{$headerRow1}")->applyFromArray($this->groupHeaderStyle('#00A1D6'));
+                $sheet->getStyle("N{$headerRow1}:Q{$headerRow1}")->applyFromArray($this->groupHeaderStyle('#008A00'));
 
                 // Subheaders
                 $subHeaders = [
-                    'HFM ACCOUNT', 'TRADING PARTNER', 'CURRENT COMPANY AMOUNT', 'COUNTERPARTY AMOUNT',
-                    'VARIANCE', 'AGREEMENT',
+                    'HFM ACCOUNT', 'TRADING PARTNER', 'DESCRIPTION', 'ADJUSTMENT (SENDER)', 'FINAL AMOUNT (SENDER)',
+                    'CURRENT COMPANY AMOUNT', 'COUNTERPARTY AMOUNT', 'VARIANCE', 'AGREEMENT',
                     'PREPARED BY', 'PREPARED AT', 'REVIEWED BY', 'REVIEWED AT',
                     'PREPARED BY', 'PREPARED AT', 'REVIEWED BY', 'REVIEWED AT',
                 ];
                 $sheet->fromArray($subHeaders, null, "A{$headerRow2}");
 
-                $sheet->getStyle("A{$headerRow2}:J{$headerRow2}")->applyFromArray($this->subHeaderStyle('#E6F2FF'));
-                $sheet->getStyle("K{$headerRow2}:N{$headerRow2}")->applyFromArray($this->subHeaderStyle('#E5F4EA'));
+                $sheet->getStyle("A{$headerRow2}:M{$headerRow2}")->applyFromArray($this->subHeaderStyle('#E6F2FF'));
+                $sheet->getStyle("N{$headerRow2}:Q{$headerRow2}")->applyFromArray($this->subHeaderStyle('#E5F4EA'));
 
                 // Apply borders to header rows
-                $sheet->getStyle("A{$headerRow1}:N{$headerRow2}")->applyFromArray([
+                $sheet->getStyle("A{$headerRow1}:Q{$headerRow2}")->applyFromArray([
                     'borders' => [
                         'allBorders' => [
                             'borderStyle' => Border::BORDER_THIN,
@@ -125,18 +128,21 @@ class ConfirmationReportExport implements FromCollection, WithEvents
                 $widths = [
                     'A' => 22,
                     'B' => 28,
-                    'C' => 22,
-                    'D' => 22,
-                    'E' => 18,
-                    'F' => 14,
-                    'G' => 14,
+                    'C' => 28,
+                    'D' => 18,
+                    'E' => 20,
+                    'F' => 22,
+                    'G' => 22,
                     'H' => 18,
                     'I' => 14,
-                    'J' => 18,
-                    'K' => 14,
-                    'L' => 18,
-                    'M' => 14,
-                    'N' => 18,
+                    'J' => 14,
+                    'K' => 18,
+                    'L' => 14,
+                    'M' => 18,
+                    'N' => 14,
+                    'O' => 18,
+                    'P' => 14,
+                    'Q' => 18,
                 ];
                 foreach ($widths as $col => $width) {
                     $sheet->getColumnDimension($col)->setWidth($width);
@@ -146,7 +152,7 @@ class ConfirmationReportExport implements FromCollection, WithEvents
                 $accountingFormat = '_-"R" * #,##0.00_ ;-"R" * (#,##0.00);_-"R" * "-"??_ ;_(@_)';
                 $lastDataRow = $dataStartRow + $this->rows->count() - 1;
                 if ($lastDataRow >= $dataStartRow) {
-                    $sheet->getStyle("C{$dataStartRow}:E{$lastDataRow}")
+                    $sheet->getStyle("D{$dataStartRow}:H{$lastDataRow}")
                         ->getNumberFormat()
                         ->setFormatCode($accountingFormat);
                 }
@@ -154,7 +160,7 @@ class ConfirmationReportExport implements FromCollection, WithEvents
                 // Red font for variance when != 0
                 if ($lastDataRow >= $dataStartRow) {
                     for ($r = $dataStartRow; $r <= $lastDataRow; $r++) {
-                        $varianceCell = "E{$r}";
+                        $varianceCell = "H{$r}";
                         if ($sheet->getCell($varianceCell)->getValue() != 0) {
                             $sheet->getStyle($varianceCell)->getFont()->getColor()->setARGB(Color::COLOR_RED);
                         }
@@ -176,23 +182,23 @@ class ConfirmationReportExport implements FromCollection, WithEvents
                 ];
                 if ($lastDataRow >= $dataStartRow) {
                     for ($r = $dataStartRow; $r <= $lastDataRow; $r++) {
-                        $agreement = $sheet->getCell("F{$r}")->getValue();
+                        $agreement = $sheet->getCell("I{$r}")->getValue();
                         if (strtolower((string) $agreement) === 'agree') {
-                            $sheet->getStyle("A{$r}:N{$r}")->applyFromArray($agreeFill);
+                            $sheet->getStyle("A{$r}:Q{$r}")->applyFromArray($agreeFill);
                         } elseif (($r - $dataStartRow) % 2 === 0) {
-                            $sheet->getStyle("A{$r}:N{$r}")->applyFromArray($zebraFill);
+                            $sheet->getStyle("A{$r}:Q{$r}")->applyFromArray($zebraFill);
                         }
                     }
                 }
 
                 // Alignments
-                $sheet->getStyle("A{$dataStartRow}:N{$lastDataRow}")
+                $sheet->getStyle("A{$dataStartRow}:Q{$lastDataRow}")
                     ->getAlignment()
                     ->setVertical(Alignment::VERTICAL_CENTER);
 
                 // Borders for data
                 if ($lastDataRow >= $dataStartRow) {
-                    $sheet->getStyle("A{$dataStartRow}:N{$lastDataRow}")->applyFromArray([
+                    $sheet->getStyle("A{$dataStartRow}:Q{$lastDataRow}")->applyFromArray([
                         'borders' => [
                             'allBorders' => [
                                 'borderStyle' => Border::BORDER_THIN,

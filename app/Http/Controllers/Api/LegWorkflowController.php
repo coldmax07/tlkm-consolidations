@@ -15,7 +15,12 @@ class LegWorkflowController extends Controller
 {
     public function update(UpdateSenderLegRequest $request, IcTransactionLeg $leg, WorkflowService $service): JsonResponse
     {
-        $updated = $service->updateSenderAmount($leg, $request->user(), (float) $request->input('amount'));
+        $updated = $service->updateSenderAmount(
+            $leg,
+            $request->user(),
+            (float) $request->input('amount'),
+            $request->input('adjustment_amount') !== null ? (float) $request->input('adjustment_amount') : null
+        );
 
         return response()->json([
             'leg' => $this->transformLeg($updated),
@@ -109,6 +114,7 @@ class LegWorkflowController extends Controller
             'company',
             'counterpartyCompany',
         ]);
+        $isSender = $leg->legRole?->name === 'SENDER';
 
         return [
             'id' => $leg->id,
@@ -117,6 +123,8 @@ class LegWorkflowController extends Controller
             'status' => $leg->status?->display_label,
             'status_name' => $leg->status?->name,
             'amount' => $leg->amount !== null ? (float) $leg->amount : null,
+            'adjustment_amount' => $isSender && $leg->adjustment_amount !== null ? (float) $leg->adjustment_amount : null,
+            'final_amount' => $isSender ? $leg->final_amount : null,
             'role' => $leg->legRole?->name,
         ];
     }

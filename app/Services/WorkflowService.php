@@ -15,13 +15,14 @@ class WorkflowService
     {
     }
 
-    public function updateSenderAmount(IcTransactionLeg $leg, User $user, float $amount): IcTransactionLeg
+    public function updateSenderAmount(IcTransactionLeg $leg, User $user, float $amount, ?float $adjustmentAmount = null): IcTransactionLeg
     {
         $this->ensureSenderLeg($leg);
         $this->ensureDraftOrRejected($leg);
 
         $leg->update([
             'amount' => $amount,
+            'adjustment_amount' => $adjustmentAmount ?? 0,
         ]);
 
         $receiverLeg = $leg->transaction

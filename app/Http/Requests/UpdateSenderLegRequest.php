@@ -19,6 +19,7 @@ class UpdateSenderLegRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'numeric'],
+            'adjustment_amount' => ['nullable', 'numeric'],
         ];
     }
 }

@@ -10,4 +10,13 @@ export default defineConfig({
         }),
         react(), // enables HMR, JSX transform, fast refresh
     ],
+    server: {
+        proxy: {
+            '/login': 'http://localhost:8000',
+            '/logout': 'http://localhost:8000',
+            '/csrf-token': 'http://localhost:8000',
+            '/api': 'http://localhost:8000',
+            '/user': 'http://localhost:8000',
+        },
+    },
 });

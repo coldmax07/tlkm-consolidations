@@ -15,7 +15,7 @@ class CompanySeeder extends Seeder
         $companies = [
 
             ['name' => 'Openserve', 'code' => 'OPS', 'is_group_company' => true, 'timezone' => 'Africa/Johannesburg'],
-            ['name' => 'BCX (Business Connexion)', 'code' => 'BCX', 'is_group_company' => true, 'timezone' => 'Africa/Johannesburg'],
+            ['name' => 'BCX', 'code' => 'BCX', 'is_group_company' => true, 'timezone' => 'Africa/Johannesburg'],
             ['name' => 'Telkom Consumer', 'code' => 'TCS', 'is_group_company' => true, 'timezone' => 'Africa/Johannesburg'],
             ['name' => 'Gyro', 'code' => 'GYR', 'is_group_company' => true, 'timezone' => 'Africa/Johannesburg'],
         ];

@@ -28,6 +28,11 @@ function varianceClass(value) {
   return num > 0 ? 'text-success fw-semibold' : 'text-danger fw-semibold'
 }
 
+function formatDescription(value, limit = 50) {
+  if (!value) return '—'
+  return value.length > limit ? `${value.slice(0, limit)}…` : value
+}
+
 export default function ReportView({ statementSlug }) {
   const [data, setData] = useState(null)
   const [companyId, setCompanyId] = useState('')
@@ -253,7 +258,7 @@ export default function ReportView({ statementSlug }) {
                     <table className="table table-striped mb-0">
                         <thead>
                         <tr className="table-primary">
-                            <th colSpan={6}></th>
+                            <th colSpan={9}></th>
                             <th colSpan={4} className="text-center text-primary bg-primary text-white">Current Company</th>
                             {isAdmin && (
                                 <th colSpan={4} className="text-center text-success bg-success text-white">Counter-part Company</th>
@@ -262,6 +267,9 @@ export default function ReportView({ statementSlug }) {
                         <tr>
                             <th>HFM Account</th>
                             <th>Trading Partner</th>
+                            <th>Description</th>
+                            <th>Adjustment (Sender)</th>
+                            <th>Final Amount (Sender)</th>
                             <th className="">Current Company Amount</th>
                             <th className="">Counterparty Amount</th>
                             <th>Variance</th>
@@ -285,6 +293,9 @@ export default function ReportView({ statementSlug }) {
                             <tr key={row.transaction_id}>
                                 <td>{row.hfm_account || '—'}</td>
                                 <td>{row.trading_partner || '—'}</td>
+                                <td>{formatDescription(row.description)}</td>
+                                <td>{formatAmount(row.adjustment_amount, mapNatureForFormatting(row.current_nature, isBalanceSheet))}</td>
+                                <td>{formatAmount(row.final_amount, mapNatureForFormatting(row.current_nature, isBalanceSheet))}</td>
                                 <td className="">{formatAmount(row.current_amount, mapNatureForFormatting(row.current_nature, isBalanceSheet))}</td>
                                 <td className="">{formatAmount(row.counterparty_amount, mapNatureForFormatting(row.counterparty_nature, isBalanceSheet))}</td>
                                 <td className={varianceClass(row.variance)}>
