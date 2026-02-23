@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { getJSON } from '../lib/http'
 import { csrfToken } from '../lib/http'
+import { notifyError, notifySuccess } from '../lib/notify'
 
 function formatAmount(value, nature, currency = 'ZAR') {
   if (value === null || value === undefined) return '—'
@@ -66,6 +67,7 @@ export default function ReportView({ statementSlug }) {
     } catch (err) {
       setError(err?.data?.message || err.message || 'Failed to load report.')
       setData(null)
+      await notifyError(err, 'Failed to load report')
     } finally {
       setLoading(false)
     }
@@ -81,6 +83,7 @@ export default function ReportView({ statementSlug }) {
   const isAdmin = Boolean(data?.meta?.is_admin)
   const companyName = data?.current_company?.name || '—'
   const requiresCompany = Boolean(data?.requires_company)
+  const hasRows = rows.length > 0
 
   const canLoad = useMemo(() => {
     if (!isAdmin) return true
@@ -96,7 +99,9 @@ export default function ReportView({ statementSlug }) {
 
   async function handleExport() {
     if (isAdmin && !companyId) {
-      setError('Select a company to export.')
+      const err = new Error('Select a company to export.')
+      setError(err.message)
+      await notifyError(err, 'Export blocked')
       return
     }
     setExporting(true)
@@ -128,8 +133,10 @@ export default function ReportView({ statementSlug }) {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
+      await notifySuccess('Excel export downloaded.')
     } catch (err) {
       setError(err.message || 'Failed to export report.')
+      await notifyError(err, 'Excel export failed')
     } finally {
       setExporting(false)
     }
@@ -137,7 +144,9 @@ export default function ReportView({ statementSlug }) {
 
   async function handleExportPdf() {
     if (isAdmin && !companyId) {
-      setError('Select a company to export.')
+      const err = new Error('Select a company to export.')
+      setError(err.message)
+      await notifyError(err, 'Export blocked')
       return
     }
     setExporting(true)
@@ -169,8 +178,10 @@ export default function ReportView({ statementSlug }) {
       link.click()
       link.remove()
       window.URL.revokeObjectURL(url)
+      await notifySuccess('PDF export downloaded.')
     } catch (err) {
       setError(err.message || 'Failed to export report.')
+      await notifyError(err, 'PDF export failed')
     } finally {
       setExporting(false)
     }
@@ -206,12 +217,12 @@ export default function ReportView({ statementSlug }) {
       {requiresCompany && (
         <div className="alert alert-warning mb-0">Select a company to view reports.</div>
       )}
-      {loading && <div className="alert alert-info mb-0">Loading report…</div>}
+      {loading && !hasRows && <div className="alert alert-info mb-0">Loading report…</div>}
       {!loading && !error && rows.length === 0 && (
         <div className="alert alert-secondary mb-0">No records for the active period.</div>
       )}
 
-      {!loading && rows.length > 0 && (
+      {hasRows && (
         <>
           <TotalsCard
             title={isBalanceSheet ? 'Net Working Capital' : 'Net Income'}
@@ -253,7 +264,17 @@ export default function ReportView({ statementSlug }) {
                 </div>
             </div>
 
-            <div className="card-body">
+            <div className="card-body position-relative">
+                {loading && (
+                    <div
+                        className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white"
+                        style={{ zIndex: 2, opacity: 0.55 }}
+                    >
+                        <div className="spinner-border text-primary" role="status" aria-label="Loading report">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                )}
                 <div className="table-responsive">
                     <table className="table table-striped mb-0">
                         <thead>

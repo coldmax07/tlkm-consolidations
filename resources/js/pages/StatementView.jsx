@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { getJSON, patchJSON, postJSON } from '../lib/http'
 import ThreadDrawer from '../components/ThreadDrawer'
+import { notifyError, notifySuccess, promptReason } from '../lib/notify'
 
 function formatAmount(amount, currency, { accounting = false } = {}) {
   if (amount === null || amount === undefined || amount === '') return '—'
@@ -42,7 +43,7 @@ function LegCell({ leg, currency, children }) {
     <div>
       <div className="fw-semibold">{leg.company?.name}</div>
       <div className="small text-muted">{leg.account?.name}</div>
-      <div className="small">{amountLabel}</div>
+      <div className="small fw-semibold text-brand-primary">{amountLabel}</div>
       <div className="small text-muted">{leg.status?.label}</div>
       {leg.agreement_status?.label && (
         <div className="small text-muted">Agreement: {leg.agreement_status.label}</div>
@@ -104,6 +105,7 @@ export default function StatementView({ statementSlug }) {
         }))
       } catch (err) {
         setError(err.message || 'Failed to load reference data.')
+        await notifyError(err, 'Failed to load filters')
       } finally {
         setLoadingMeta(false)
       }
@@ -132,7 +134,7 @@ export default function StatementView({ statementSlug }) {
         setData(response)
       } catch (err) {
         setError(err?.data?.message || err.message || 'Unable to load statement data.')
-        setData(null)
+        await notifyError(err, 'Unable to load statement data')
       } finally {
         setLoadingData(false)
       }
@@ -270,9 +272,11 @@ export default function StatementView({ statementSlug }) {
         amount: newAmount,
         adjustment_amount: adjustmentAmount,
       })
+      await notifySuccess('Sender amount updated.')
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to save amount.')
+      await notifyError(err, 'Unable to save sender amount')
     } finally {
       setLegLoading(leg.id, false)
     }
@@ -284,9 +288,11 @@ export default function StatementView({ statementSlug }) {
     setError('')
     try {
       await postJSON(`/api/legs/${leg.id}/submit`, {})
+      await notifySuccess('Sender leg submitted for review.')
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to submit leg.')
+      await notifyError(err, 'Unable to submit sender leg')
     } finally {
       setLegLoading(leg.id, false)
     }
@@ -298,9 +304,11 @@ export default function StatementView({ statementSlug }) {
     setError('')
     try {
       await postJSON(`/api/legs/${leg.id}/approve`, {})
+      await notifySuccess('Sender leg approved.')
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to approve leg.')
+      await notifyError(err, 'Unable to approve sender leg')
     } finally {
       setLegLoading(leg.id, false)
     }
@@ -308,15 +316,17 @@ export default function StatementView({ statementSlug }) {
 
   async function rejectLeg(leg) {
     if (!leg) return
-    const reason = window.prompt('Provide a rejection reason:')
+    const reason = await promptReason({ title: 'Reject Sender Leg', text: 'Provide a rejection reason.' })
     if (!reason) return
     setLegLoading(leg.id, true)
     setError('')
     try {
       await postJSON(`/api/legs/${leg.id}/reject`, { reason })
+      await notifySuccess('Sender leg rejected.')
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to reject leg.')
+      await notifyError(err, 'Unable to reject sender leg')
     } finally {
       setLegLoading(leg.id, false)
     }
@@ -332,9 +342,11 @@ export default function StatementView({ statementSlug }) {
         agreement_status_id: legAgreements[leg.id],
         disagree_reason: legReasons[leg.id] || null,
       })
+      await notifySuccess('Receiver leg updated.')
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to save receiver leg.')
+      await notifyError(err, 'Unable to save receiver leg')
     } finally {
       setLegLoading(leg.id, false)
     }
@@ -346,9 +358,11 @@ export default function StatementView({ statementSlug }) {
     setError('')
     try {
       await postJSON(`/api/legs/${leg.id}/receiver/submit`, {})
+      await notifySuccess('Receiver leg submitted for review.')
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to submit receiver leg.')
+      await notifyError(err, 'Unable to submit receiver leg')
     } finally {
       setLegLoading(leg.id, false)
     }
@@ -360,9 +374,11 @@ export default function StatementView({ statementSlug }) {
     setError('')
     try {
       await postJSON(`/api/legs/${leg.id}/receiver/approve`, {})
+      await notifySuccess('Receiver leg approved.')
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to approve receiver leg.')
+      await notifyError(err, 'Unable to approve receiver leg')
     } finally {
       setLegLoading(leg.id, false)
     }
@@ -370,15 +386,17 @@ export default function StatementView({ statementSlug }) {
 
   async function rejectReceiverLeg(leg) {
     if (!leg) return
-    const reason = window.prompt('Provide a rejection reason:')
+    const reason = await promptReason({ title: 'Reject Receiver Leg', text: 'Provide a rejection reason.' })
     if (!reason) return
     setLegLoading(leg.id, true)
     setError('')
     try {
       await postJSON(`/api/legs/${leg.id}/receiver/reject`, { reason })
+      await notifySuccess('Receiver leg rejected.')
       setReloadVersion(v => v + 1)
     } catch (err) {
       setError(err?.data?.message || err.message || 'Unable to reject receiver leg.')
+      await notifyError(err, 'Unable to reject receiver leg')
     } finally {
       setLegLoading(leg.id, false)
     }
@@ -546,11 +564,21 @@ export default function StatementView({ statementSlug }) {
         <div className="card-header">
           <strong>Transactions</strong>
         </div>
-        {loadingData ? (
+        {loadingData && !data ? (
           <div className="card-body">Loading statement…</div>
         ) : (
           <>
-            <div className="card-body">
+            <div className="card-body position-relative">
+                {loadingData && (
+                    <div
+                        className="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-white"
+                        style={{ zIndex: 2, opacity: 0.55 }}
+                    >
+                        <div className="spinner-border text-primary" role="status" aria-label="Loading statement">
+                            <span className="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                )}
                 <div className="table-responsive">
                     <table className="table table-hover table-striped mb-0">
                         <thead>
@@ -602,7 +630,7 @@ export default function StatementView({ statementSlug }) {
                                         </button>
                                     </td>
                                     <td>{formatDescription(tx.description)}</td>
-                                    <td>
+                                    <td className="align-top">
                                         <LegCell leg={senderLeg} currency={tx.currency}>
                                             {senderLeg && (
                                                 <>
@@ -677,7 +705,7 @@ export default function StatementView({ statementSlug }) {
                                             )}
                                         </LegCell>
                                     </td>
-                                    <td>
+                                    <td className="align-top">
                                         <LegCell leg={receiverLeg} currency={tx.currency}>
                                             {(receiverCanEdit || receiverCanReview) && (
                                                 <div className="mt-2 vstack gap-2">
